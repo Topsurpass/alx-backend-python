@@ -14,6 +14,7 @@ T = TypeVar('T')
 
 def safely_get_value(
         dct: Mapping, key: Any, default: Optional[T] = None) -> Union[Any, T]:
+    """A function that safely get value from maplike parameters"""
     if key in dct:
         return dct[key]
     else:
