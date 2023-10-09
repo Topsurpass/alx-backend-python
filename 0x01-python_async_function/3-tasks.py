@@ -8,7 +8,7 @@ import asyncio
 wait_random = __import__('0-basic_async_syntax').wait_random
 
 
-def task_wait_random(max_delay: int) -> asyncio.tasks:
+def task_wait_random(max_delay: int) -> asyncio.Task:
     """The event loop is responsible for coordinating the execution
     of asynchronous tasks and coroutines.create_task schedules
     the execution of the wait_random coroutine within the event
