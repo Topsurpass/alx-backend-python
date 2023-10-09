@@ -14,8 +14,5 @@ async def task_wait_n(n: int, max_delay: int) -> List[float]:
     task_wait_random is being called."""
 
     outputList = [task_wait_random(max_delay) for _ in range(n)]
-    result = []
-    for task in asyncio.as_completed(outputList):
-        delayOrder = await task
-        result.append(delayOrder)
-    return result
+    result = await asyncio.gather(*outputList)
+    return sorted(result)
