@@ -13,6 +13,4 @@ def task_wait_random(max_delay: int) -> asyncio.tasks:
     of asynchronous tasks and coroutines.create_task schedules
     the execution of the wait_random coroutine within the event
     loop and returns a task object representing that execution."""
-    createLoop = asyncio.get_event_loop()
-    theTask = createLoop.create_task(wait_random(max_delay))
-    return theTask
+    return asyncio.create_task(wait_random(max_delay))
