@@ -40,7 +40,22 @@ class TestGithubOrgClient(unittest.TestCase):
                     GithubOrgClient('google')._public_repos_url, url)
 
 
+class TestGithubOrgClient(unittest.TestCase):
+    """Mulpiple patching"""
+    @patch('client.get_json')
+    def test_public_repos(self, mock_obj):
+        repo_list = ['https://github.com/Topsurpass',
+                     'https://github.com/Temitope']
+        rtn_obj = {'repos_url': repo_list}
+        mock_obj.return_value = rtn_obj
 
-
-
-        
+        with patch(
+                'client.GithubOrgClient._public_repos_url',
+                new_callable=PropertyMock
+                ) as mock_patch_obj:
+            mock_patch_obj.return_value = rtn_obj['repos_url']
+            new_obj = GithubOrgClient('github')
+            self.assertEqual(new_obj.org, rtn_obj)
+            self.assertEqual(new_obj._public_repos_url, repo_list)
+            mock_obj.assert_called_once()
+            mock_patch_obj.assert_called_once()
