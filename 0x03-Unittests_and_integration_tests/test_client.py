@@ -68,15 +68,15 @@ class TestGithubOrgClient(unittest.TestCase):
         ({"license": {"key": "other_license"}}, "my_license", False)
     ])
     def test_has_lincense(
-            self, license: Dict,
+            self,
+            license: Dict,
             key: str,
             outcome: bool
             ) -> None:
         """Test has_lincense method"""
-        self.assertEqual(
-                GithubOrgClient('google').has_license(license, key),
-                outcome
-                )
+        obj = GithubOrgClient('google')
+        obj_rtn_val = obj.has_license(license, key)
+        self.assertEqual(obj_rtn_val, outcome)
 
 
 @parameterized_class([
