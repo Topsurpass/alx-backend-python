@@ -2,11 +2,12 @@
 """This module contains test fixtures for the client module"""
 
 import unittest
-from unittest.mock import patch, Mock, PropertyMock
+from unittest.mock import patch, Mock, MagicMock, PropertyMock
 from client import GithubOrgClient
 from parameterized import parameterized, parameterized_class
-from typing import Dict, Any
+from typing import Dict
 from fixtures import TEST_PAYLOAD
+from requests import HTTPError
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -16,11 +17,11 @@ class TestGithubOrgClient(unittest.TestCase):
         ('abc', {'name': 'abc'})
     ])
     @patch('client.get_json')
-    def test_org(self, org: str, rtr: Dict, mock_obj: Any) -> None:
+    def test_org(self, org: str, rtr: Dict, mock_obj: MagicMock) -> None:
         """Test the method org and patch get_json method to prevent
         external call"""
         githubObj = GithubOrgClient(org)
-        mock_obj.return_value = Mock(return_value=rtr)
+        mock_obj.return_value = MagicMock(return_value=rtr)
         self.assertEqual(githubObj.org(), rtr)
         mock_obj.assert_called_once_with(
                 "https://api.github.com/orgs/{}".format(org))
@@ -44,7 +45,7 @@ class TestGithubOrgClient(unittest.TestCase):
                     GithubOrgClient('google')._public_repos_url, url)
 
     @patch('client.get_json')
-    def test_public_repos(self, mock_obj: Mock) -> None:
+    def test_public_repos(self, mock_obj: MagicMock) -> None:
         """Mulpiple patching"""
         repo_list = [
                 {'name': 'Topsurpass'},
@@ -69,13 +70,13 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     def test_has_lincense(
             self,
-            license: Dict,
+            repo: Dict,
             key: str,
             outcome: bool
             ) -> None:
         """Test has_lincense method"""
         obj = GithubOrgClient('google')
-        obj_rtn_val = obj.has_license(license, key)
+        obj_rtn_val = obj.has_license(repo, key)
         self.assertEqual(obj_rtn_val, outcome)
 
 
@@ -99,11 +100,11 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             'https://api.github.com/orgs/google/repos': cls.repos_payload,
         }
 
-    def get_payload(url):
-        """Get payload value"""
-        if url in route_payload:
-            return Mock(**{'json.return_value': route_payload[url]})
-        return HTTPError
+        def get_payload(url):
+            """Get payload value"""
+            if url in route_payload:
+                return Mock(**{'json.return_value': route_payload[url]})
+            return HTTPError
 
         cls.get_patcher = patch("requests.get", side_effect=get_payload)
         cls.get_patcher.start()
