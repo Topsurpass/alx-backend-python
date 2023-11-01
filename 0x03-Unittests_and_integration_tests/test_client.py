@@ -39,8 +39,6 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(
                     GithubOrgClient('google')._public_repos_url, url)
 
-
-class TestGithubOrgClient(unittest.TestCase):
     """Mulpiple patching"""
     @patch('client.get_json')
     def test_public_repos(self, mock_obj):
