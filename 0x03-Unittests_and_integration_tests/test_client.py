@@ -44,7 +44,6 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(
                     GithubOrgClient('google')._public_repos_url, url)
 
-    """Mulpiple patching"""
     @patch('client.get_json')
     def test_public_repos(self, mock_obj: MagicMock) -> None:
         """Mulpiple patching"""
@@ -69,12 +68,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ({"license": {"key": "my_license"}}, "my_license", True),
         ({"license": {"key": "other_license"}}, "my_license", False)
     ])
-    def test_has_license(
-            self,
-            repo: Dict,
-            key: str,
-            outcome: bool
-            ) -> None:
+    def test_has_license(self, repo: Dict, key: str, outcome: bool) -> None:
         """Test has_license method"""
         obj = GithubOrgClient('google')
         obj_rtn_val = obj.has_license(repo, key)
