@@ -46,36 +46,42 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-
 class MessageViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, creating, and managing messages.
     """
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    # Define filterable fields
     filterset_fields = ['conversation', 'sender']
     search_fields = ['message_body']
     ordering_fields = ['created_at', 'sender']
 
-    def create(self, request):
+    def get_queryset(self):
+        """
+        Filter messages by conversation ID from the nested URL.
+        """
+        conversation_id = self.kwargs.get('conversation_pk')  # NestedDefaultRouter provides 'conversation_pk'
+        if conversation_id:
+            return Message.objects.filter(conversation__conversation_id=conversation_id)
+        return Message.objects.all()
+
+    def create(self, request, *args, **kwargs):
         """
         Custom endpoint to send a message to an existing conversation.
         """
-        conversation_id = request.data.get('conversation')
-        sender = request.data.get('sender')
+        conversation_id = kwargs.get('conversation_pk')
+        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
+        sender_id = request.data.get('sender')
         message_body = request.data.get('message_body')
 
-        if not (conversation_id and sender and message_body):
+        if not (sender_id and message_body):
             return Response(
-                {"error": "conversation_id, sender_id, and message_body are required."},
+                {"error": "Sender and message_body are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
-        sender = get_object_or_404(User, user_id=sender)
+        sender = get_object_or_404(User, user_id=sender_id)
 
         message = Message.objects.create(
             conversation=conversation,
@@ -84,23 +90,29 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    
+
     @action(detail=False, methods=['get'], url_path='messages-by-user')
-    def messages_by_user(self, request):
+    def messages_by_user(self, request, *args, **kwargs):
         """
-        Custom endpoint to fetch all messages sent by a specific user.
+        Custom endpoint to fetch all messages sent by a specific user within a specific conversation.
         Accepts `user_id` in the query parameters.
         """
+        conversation_pk = kwargs.get('conversation_pk')  # Get conversation ID from nested URL
         user_id = request.query_params.get('user_id')
+
         if not user_id:
             return Response(
                 {"error": "user_id is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Validate conversation existence
+        conversation = get_object_or_404(Conversation, conversation_id=conversation_pk)
         user = get_object_or_404(User, user_id=user_id)
-        messages = Message.objects.filter(sender=user)
+
+        # Filter messages by both conversation and sender
+        messages = Message.objects.filter(conversation=conversation, sender=user)
 
         serializer = MessageSerializer(messages, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
