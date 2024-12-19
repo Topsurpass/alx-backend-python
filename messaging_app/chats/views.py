@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Conversation, Message, User
-from .serielezers import ConversationSerializer, MessageSerializer, UserSerializer
+from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
