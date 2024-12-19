@@ -2,8 +2,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Conversation, Message, User
-from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
+from .serielezers import ConversationSerializer, MessageSerializer, UserSerializer
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 
 
@@ -51,11 +53,16 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # Define filterable fields
+    filterset_fields = ['conversation', 'sender']
+    search_fields = ['message_body']
+    ordering_fields = ['created_at', 'sender']
 
     def create(self, request):
         """
         Custom endpoint to send a message to an existing conversation.
-        Accepts `conversation_id`, `sender_id`, and `message_body` in the request body.
         """
         conversation_id = request.data.get('conversation')
         sender = request.data.get('sender')

@@ -16,21 +16,40 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        # Extract groups and permissions from validated_data if provided
+        """
+        Overriding the create method to hash the password.
+        """
         groups = validated_data.pop('groups', [])
         user_permissions = validated_data.pop('user_permissions', [])
 
-        # Create the user and hash the password
+        # Use the create_user method to ensure password hashing
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            phone_number=validated_data['phone_number'],
+            username=validated_data.get('username'),
+            email=validated_data.get('email'),
+            password=validated_data.get('password'),
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name'),
+            phone_number=validated_data.get('phone_number'),
         )
-        
+
+        user.groups.set(groups)
+        user.user_permissions.set(user_permissions)
+
         return user
+
+    def update(self, instance, validated_data):
+        """
+        Overriding the update method to handle password hashing.
+        """
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
 
 class MessageSerializer(serializers.ModelSerializer):
     """Serializer for the Message model."""

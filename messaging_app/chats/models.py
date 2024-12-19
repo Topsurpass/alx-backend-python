@@ -15,7 +15,7 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=5, choices=ROLE_CHOICES, default='guest')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    password = models.CharField(max_length=128)
     groups = models.ManyToManyField(
         "auth.Group",
         related_name="custom_user_groups",
