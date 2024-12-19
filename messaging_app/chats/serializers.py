@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import User, Conversation, Message
 
-
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User model."""
+
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
@@ -14,6 +15,16 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name': {'required': True},
             'last_name': {'required': True},
         }
+
+    def validate(self, attrs):
+        """
+        Ensure password and confirm_password match.
+        """
+        password = attrs.get('password')
+        confirm_password = attrs.pop('confirm_password', None)
+        if password != confirm_password:
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        return attrs
 
     def create(self, validated_data):
         """
@@ -51,15 +62,19 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
 class MessageSerializer(serializers.ModelSerializer):
     """Serializer for the Message model."""
     fullname = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
-        fields ='__all__'
-        
+        fields = '__all__'
+
     def get_fullname(self, obj):
+        """
+        Retrieve the full name of the message sender.
+        """
         return f"{obj.sender.first_name} {obj.sender.last_name}"
 
 
@@ -70,4 +85,3 @@ class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = '__all__'
-
