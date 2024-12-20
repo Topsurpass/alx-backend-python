@@ -5,7 +5,10 @@ from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsConversationParticipant, IsMessageSender
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import filters
+from rest_framework.exceptions import PermissionDenied
 
 
 
@@ -13,12 +16,14 @@ class UserCreateView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, creating, and managing conversations.
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    permission_classes = [IsAuthenticated, IsConversationParticipant]
 
     def create(self, request):
         """
@@ -52,6 +57,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    permission_classes = [IsAuthenticated, IsMessageSender]
 
     filterset_fields = ['conversation', 'sender']
     search_fields = ['message_body']
@@ -82,7 +88,6 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
 
         sender = get_object_or_404(User, user_id=sender_id)
-
         message = Message.objects.create(
             conversation=conversation,
             sender=sender,

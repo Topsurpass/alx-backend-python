@@ -30,6 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Overriding the create method to hash the password.
         """
+        password = validated_data.pop('password')
         groups = validated_data.pop('groups', [])
         user_permissions = validated_data.pop('user_permissions', [])
 
@@ -42,6 +43,9 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name'),
             phone_number=validated_data.get('phone_number'),
         )
+        
+        user.set_password(password)  # Hash the password explicitly
+        user.save()
 
         user.groups.set(groups)
         user.user_permissions.set(user_permissions)
