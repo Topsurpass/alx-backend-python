@@ -5,7 +5,6 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User model."""
 
     confirm_password = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
         fields = '__all__'
@@ -44,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             phone_number=validated_data.get('phone_number'),
         )
         
-        user.set_password(password)  # Hash the password explicitly
+        user.set_password(password)
         user.save()
 
         user.groups.set(groups)

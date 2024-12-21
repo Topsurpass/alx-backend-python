@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsParticipantOfConversation
 from rest_framework import filters
 from rest_framework.exceptions import PermissionDenied
+from .filters import MessageFilter
 
 
 
@@ -57,6 +58,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     permission_classes = [IsParticipantOfConversation]
+    filterset_class = MessageFilter
 
 
     filterset_fields = ['conversation', 'sender']
