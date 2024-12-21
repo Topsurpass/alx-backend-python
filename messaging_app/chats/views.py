@@ -9,6 +9,7 @@ from .permissions import IsParticipantOfConversation
 from rest_framework import filters
 from rest_framework.exceptions import PermissionDenied
 from .filters import MessageFilter
+from .pagination import CustomMessagePagination
 
 
 
@@ -24,6 +25,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     permission_classes = [IsParticipantOfConversation]
+    pagination_class = CustomMessagePagination 
 
     def create(self, request):
         """
