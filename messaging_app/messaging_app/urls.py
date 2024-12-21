@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from messaging_app.chats.urls import main_api_urlpatterns, auth_api_urlpatterns
+from chats.urls import main_api_urlpatterns, auth_api_urlpatterns
 from rest_framework_simplejwt.views import TokenRefreshView
-from messaging_app.chats.auth import CustomTokenObtainPairView
+from chats.auth import CustomTokenObtainPairView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
