@@ -5,8 +5,7 @@ from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
-from .permissions import IsConversationParticipant, IsMessageSender
-from rest_framework.permissions import IsAuthenticated
+from .permissions import IsParticipantOfConversation
 from rest_framework import filters
 from rest_framework.exceptions import PermissionDenied
 
@@ -23,7 +22,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated, IsConversationParticipant]
+    permission_classes = [IsParticipantOfConversation]
 
     def create(self, request):
         """
@@ -57,7 +56,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    permission_classes = [IsAuthenticated, IsMessageSender]
+    permission_classes = [IsParticipantOfConversation]
+
 
     filterset_fields = ['conversation', 'sender']
     search_fields = ['message_body']
@@ -78,16 +78,20 @@ class MessageViewSet(viewsets.ModelViewSet):
         """
         conversation_id = kwargs.get('conversation_pk')
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
-        sender_id = request.data.get('sender')
         message_body = request.data.get('message_body')
+        sender_id = request.data.get('sender')
 
-        if not (sender_id and message_body):
+        if not message_body:
             return Response(
-                {"error": "Sender and message_body are required."},
+                {"error": "message_body is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         sender = get_object_or_404(User, user_id=sender_id)
+        if not conversation.participants.filter(user_id=sender.user_id).exists():
+            raise PermissionDenied("You are not a participant of this conversation.")
+
+
         message = Message.objects.create(
             conversation=conversation,
             sender=sender,
@@ -95,6 +99,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     @action(detail=False, methods=['get'], url_path='messages-by-user')
     def messages_by_user(self, request, *args, **kwargs):
