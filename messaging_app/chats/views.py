@@ -10,7 +10,7 @@ from rest_framework import filters
 from rest_framework.exceptions import PermissionDenied
 from .filters import MessageFilter
 from .pagination import CustomMessagePagination
-
+from rest_framework.exceptions import NotFound
 
 
 class UserCreateView(viewsets.ModelViewSet):
@@ -71,8 +71,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         """
         Filter messages by conversation ID from the nested URL.
         """
-        conversation_id = self.kwargs.get('conversation_pk')  # NestedDefaultRouter provides 'conversation_pk'
+        conversation_id = self.kwargs.get('conversation_pk')
         if conversation_id:
+            if not Conversation.objects.filter(conversation_id=conversation_id).exists():
+                raise NotFound(detail="No Conversation matches the given query.")
             return Message.objects.filter(conversation__conversation_id=conversation_id)
         return Message.objects.all()
 
@@ -111,7 +113,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         Custom endpoint to fetch all messages sent by a specific user within a specific conversation.
         Accepts `user_id` in the query parameters.
         """
-        conversation_pk = kwargs.get('conversation_pk')  # Get conversation ID from nested URL
+        conversation_pk = kwargs.get('conversation_pk')
         user_id = request.query_params.get('user_id')
 
         if not user_id:
@@ -120,11 +122,9 @@ class MessageViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Validate conversation existence
         conversation = get_object_or_404(Conversation, conversation_id=conversation_pk)
         user = get_object_or_404(User, user_id=user_id)
 
-        # Filter messages by both conversation and sender
         messages = Message.objects.filter(conversation=conversation, sender=user)
 
         serializer = MessageSerializer(messages, many=True)
