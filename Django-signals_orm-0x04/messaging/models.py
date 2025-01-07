@@ -9,7 +9,7 @@ class Message(models.Model):
     edited = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.sender.username}: {self.content[:30]}"
+        return f"{self.sender}: {self.content[:30]}"
     
 class MessageHistory(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='history')
@@ -18,7 +18,7 @@ class MessageHistory(models.Model):
     edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     
     def __str__(self):
-        return f"Message with ID {self.message.id} was edited on {self.edited_at} by {self.edited_by.username}"
+        return f"Message with ID {self.message.id} was edited on {self.edited_at} by {self.edited_by}"
 
 class Notification(models.Model):
     user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
