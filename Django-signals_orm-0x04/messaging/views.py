@@ -8,7 +8,7 @@ from .models import Message
 @login_required
 def unread_messages_view(request):
     """View to fetch all unread messages for a user."""
-    unread_messages = Message.unread.for_user(request.user)
+    unread_messages = Message.unread.unread_for_user(request.user).only('sender', 'content', 'timestamp')
     return render(request, 'chat/unread_messages.html', {'unread_messages': unread_messages})
 
 @login_required
