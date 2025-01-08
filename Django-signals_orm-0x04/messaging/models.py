@@ -7,9 +7,19 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    parent_message = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+    )
 
     def __str__(self):
-        return f"{self.sender}: {self.content[:30]}"
+        return f"Message from {self.sender} to {self.receiver} with ID {self.id}"
+
+    def get_all_replies(self):
+        """Fetch all replies recursively for a message."""
+        replies = self.replies.all().select_related('sender', 'receiver')
+        for reply in replies:
+            reply.get_all_replies()
+        return replies
     
 class MessageHistory(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='history')

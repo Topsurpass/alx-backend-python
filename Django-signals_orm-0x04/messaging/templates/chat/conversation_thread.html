@@ -1,0 +1,19 @@
+<h2>Conversation Thread</h2>
+<p><strong>Message:</strong> {{ message.content }} (from {{ message.sender }})</p>
+<h3>Replies:</h3>
+<ul>
+    {% for reply in replies %}
+        <li>
+            <p>{{ reply.sender }}: {{ reply.content }}</p>
+            {% with reply.get_all_replies as nested_replies %}
+                {% for nested_reply in nested_replies %}
+                    <ul>
+                        <li>{{ nested_reply.sender }} : {{ nested_reply.content }}</li>
+                    </ul>
+                {% endfor %}
+            {% endwith %}
+        </li>
+    {% endfor %}
+</ul>
+
+
