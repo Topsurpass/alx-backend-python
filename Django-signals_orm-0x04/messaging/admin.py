@@ -3,7 +3,7 @@ from .models import Message, Notification, MessageHistory
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('sender', 'content', 'receiver', 'edited', 'timestamp', 'id')
+    list_display = ('sender', 'content', 'receiver', 'edited', 'timestamp', 'read', 'id')
     search_fields = ('sender__username', 'receiver__username')
 
 @admin.register(MessageHistory)

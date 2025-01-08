@@ -2,18 +2,32 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class UnreadMessagesManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(read=False)
+
+    def for_user(self, user):
+        return self.get_queryset().filter(receiver=user).only('sender', 'content', 'timestamp')
+
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    read = models.BooleanField(default=False)
     parent_message = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
     )
+    objects = models.Manager()
+    unread = UnreadMessagesManager()
+
+    def mark_as_read(self):
+        self.read = True
+        self.save()
 
     def __str__(self):
-        return f"Message from {self.sender} to {self.receiver} with ID {self.id}"
+        return f"Message from {self.sender} to {self.receiver} with ID {self.id} (Read: {self.read})"
 
     def get_all_replies(self):
         """Fetch all replies recursively for a message."""

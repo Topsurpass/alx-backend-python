@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from .models import Message
 
+
 @login_required
-def delete_user(request):
-    user = request.user
-    user.delete()
-    return JsonResponse({"message": "Your account has been deleted successfully."})
+def unread_messages_view(request):
+    """View to fetch all unread messages for a user."""
+    unread_messages = Message.unread.for_user(request.user)
+    return render(request, 'chat/unread_messages.html', {'unread_messages': unread_messages})
 
 @login_required
 def conversation_thread(request, message_id):
@@ -20,3 +21,10 @@ def conversation_thread(request, message_id):
     )
     context = {'message': message, 'replies': message.get_all_replies()}
     return render(request, 'chat/conversation_thread.html', context)
+
+@login_required
+def delete_user(request):
+    user = request.user
+    user.delete()
+    return JsonResponse({"message": "Your account has been deleted successfully."})
+
