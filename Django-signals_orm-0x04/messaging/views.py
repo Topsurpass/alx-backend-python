@@ -10,11 +10,12 @@ def delete_user(request):
     user.delete()
     return JsonResponse({"message": "Your account has been deleted successfully."})
 
-
+@login_required
 def conversation_thread(request, message_id):
     """View to fetch a message and its replies using prefetch_related."""
     message = get_object_or_404(
-        Message.objects.prefetch_related('replies').select_related('sender', 'receiver'),
+        Message.objects.prefetch_related('replies').select_related('sender', 'receiver')
+        .filter(sender=request.user) | Message.objects.filter(receiver=request.user), 
         id=message_id
     )
     context = {'message': message, 'replies': message.get_all_replies()}
