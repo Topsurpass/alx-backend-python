@@ -1,7 +1,7 @@
 from django.http import JsonResponse
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
 from .models import Message
 
 
@@ -12,6 +12,7 @@ def unread_messages_view(request):
     return render(request, 'chat/unread_messages.html', {'unread_messages': unread_messages})
 
 @login_required
+@cache_page(60)
 def conversation_thread(request, message_id):
     """View to fetch a message and its replies using prefetch_related."""
     message = get_object_or_404(
