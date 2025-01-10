@@ -1,4 +1,3 @@
-# messaging/managers.py
 from django.db import models
 
 class UnreadMessagesManager(models.Manager):

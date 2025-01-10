@@ -20,7 +20,7 @@ class Message(models.Model):
         self.save()
 
     def __str__(self):
-        return f"Message from {self.sender} to {self.receiver} with ID {self.id} (Read: {self.read})"
+        return f"Msg ID: {self.id} - {self.content}"
 
     def get_all_replies(self):
         """Fetch all replies recursively for a message."""
