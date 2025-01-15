@@ -50,7 +50,7 @@ class RestrictAccessByTimeMiddleware:
         return response
 
 
-class MessageLimitMiddleware:
+class OffensiveLanguageMiddleware:
     """Middleware to limit the number of messages a user can send in a time window."""
     def __init__(self, get_response):
         self.get_response = get_response
@@ -81,7 +81,7 @@ class MessageLimitMiddleware:
         return response
     
 
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     """Middleware to restrict access to certain endpoints based on user role."""
     def __init__(self, get_response):
         self.get_response = get_response
