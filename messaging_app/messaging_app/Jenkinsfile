@@ -4,6 +4,8 @@ pipeline {
     environment {
         // Define any environment variables if needed
         VENV = "venv"  // Virtual environment name
+        DOCKER_IMAGE = "temz/messaging_app-web"
+        DOCKER_CREDENTIALS = "7b6e619b-f496-4730-88e5-3f2d6f6fa903"
     }
 
     stages {
@@ -46,6 +48,23 @@ pipeline {
                 }
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t ${DOCKER_IMAGE}:v1.0 .'
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', DOCKER_CREDENTIALS) {
+                        sh 'docker push ${DOCKER_IMAGE}:v1.0'
+                    }
+                }
+            }
+        }
+        
     }
 
     post {
