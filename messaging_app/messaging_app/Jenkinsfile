@@ -24,9 +24,9 @@ pipeline {
             steps {
                 dir('messaging_app') {
                     sh '''
-                    # Install required system dependencies
-                    sudo apt-get update
-                    sudo apt-get install -y pkg-config libmysqlclient-dev
+                    # Install required system dependencies (without sudo)
+                    apt-get update || true
+                    apt-get install -y pkg-config libmysqlclient-dev || true
 
                     # Create virtual environment
                     python3 -m venv ${VENV}
