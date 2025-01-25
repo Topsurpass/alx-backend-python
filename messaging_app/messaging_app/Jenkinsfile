@@ -25,6 +25,7 @@ pipeline {
                 sh '''
                 python3 -m venv ${VENV}
                 bash -c "source ${VENV}/bin/activate"
+                bash -c "pwd && ls -la"
                 ${VENV}/bin/pip3 install --upgrade pip
                 ${VENV}/bin/pip3 install -r ./requirements.txt
                 '''
