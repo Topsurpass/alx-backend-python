@@ -1,0 +1,67 @@
+name: CI - Django Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root --password=secret --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11.2
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -u test_user --password=test_password --silent; do
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
+
+      - name: Run Migrations
+        env:
+          DATABASE_URL: "mysql://test_user:test_password@127.0.0.1:3306/test_db"
+        run: |
+          source venv/bin/activate
+          python manage.py makemigrations
+          python manage.py migrate
+
+      - name: Run Tests
+        env:
+          DATABASE_URL: "mysql://test_user:test_password@127.0.0.1:3306/test_db"
+        run: |
+          source venv/bin/activate
+          python manage.py test
