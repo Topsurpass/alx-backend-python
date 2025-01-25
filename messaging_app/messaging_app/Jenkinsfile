@@ -27,6 +27,7 @@ pipeline {
                     python3 -m venv ${VENV}
                     bash -c "source ${VENV}/bin/activate"
                     ${VENV}/bin/pip3 install --upgrade pip
+                    ${VENV}/bin/pip3 install --pytest
                     ${VENV}/bin/pip3 install -r messaging_app/requirements.txt
                     '''
                 }
