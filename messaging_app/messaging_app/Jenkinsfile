@@ -34,8 +34,7 @@ pipeline {
             steps {
                 dir('messaging_app') {
                     sh '''
-                    bash -c "source ${VENV}/bin/activate"
-                    pytest --junitxml=report.xml
+                    bash -c "source ${VENV}/bin/activate && pytest --junitxml=report.xml"
                     '''
                 }
             }
@@ -50,8 +49,10 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t ${DOCKER_IMAGE}:v1.0 .'
+                dir('messaging_app') {
+                    script {
+                        sh 'docker build -t ${DOCKER_IMAGE}:v1.0 messaging_app/Dockerfile'
+                    }
                 }
             }
         }
