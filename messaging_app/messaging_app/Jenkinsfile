@@ -21,8 +21,9 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            dir('messaging_app') {
-                steps {
+           
+            steps {
+                dir('messaging_app') {
                     sh '''
                     python3 -m venv ${VENV}
                     bash -c "source ${VENV}/bin/activate"
@@ -33,6 +34,7 @@ pipeline {
                     '''
                 }
             }
+        
             
         }
 
