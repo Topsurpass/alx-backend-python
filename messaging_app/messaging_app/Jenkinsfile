@@ -21,21 +21,26 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps {
-                sh '''
-                python3 -m venv ${VENV}
-                source ${VENV}/bin/activate
-                pip3 install -r messaging_app/requirements.txt
-                '''
+             dir('messaging_app') {
+                steps {
+                    sh '''
+                    python3 -m venv ${VENV}
+                    source ${VENV}/bin/activate
+                    pip3 install -r messaging_app/requirements.txt
+                    '''
+                }
             }
+            
         }
 
         stage('Run Tests') {
-            steps {
-                sh '''
-                source ${VENV}/bin/activate
-                pytest --junitxml=report.xml
-                '''
+            dir('messaging_app') {
+                steps {
+                    sh '''
+                    source ${VENV}/bin/activate
+                    pytest --junitxml=report.xml
+                    '''
+                }
             }
         }
 
