@@ -19,7 +19,7 @@ pipeline {
                 ])
             }
         }
-        stage('Install Dependencies') {
+        stage('Update the system before Install Dependencies') {
                     steps {
                         script {
                             // Update the system and install required dependencies
