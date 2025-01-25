@@ -29,21 +29,33 @@ jobs:
           MYSQL_PASSWORD: test_password
 
     steps:
+      # Checkout code from the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Set up Python environment
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11.2
 
+      # Install dependencies, including flake8 and coverage
       - name: Install Dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 coverage
 
+      # Run flake8 linting BEFORE connecting to MySQL
+      - name: Run flake8 for linting
+        run: |
+          source venv/bin/activate
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+      # Wait for MySQL to be ready
       - name: Wait for MySQL
         run: |
           until mysqladmin ping -h 127.0.0.1 -u test_user --password=test_password --silent; do
@@ -51,6 +63,7 @@ jobs:
             sleep 5
           done
 
+      # Run Django migrations
       - name: Run Migrations
         env:
           DATABASE_URL: "mysql://test_user:test_password@127.0.0.1:3306/test_db"
@@ -59,9 +72,18 @@ jobs:
           python manage.py makemigrations
           python manage.py migrate
 
-      - name: Run Tests
+      # Run Django tests and generate coverage
+      - name: Run Django Tests and Generate Coverage
         env:
           DATABASE_URL: "mysql://test_user:test_password@127.0.0.1:3306/test_db"
         run: |
           source venv/bin/activate
-          python manage.py test
+          coverage run manage.py test
+          coverage report
+
+      # Upload coverage report as an artifact
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
