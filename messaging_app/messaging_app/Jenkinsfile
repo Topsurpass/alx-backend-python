@@ -10,7 +10,8 @@ pipeline {
         stage('Clone Repository') {
                 steps {
                     git branch: 'master', 
-                    url: 'https://github.com/Topsurpass/alx-backend-python'
+                    url: 'https://github.com/Topsurpass/alx-backend-python',
+                    credentialsId: 'f693b385-dc93-4553-929f-14590e4ba598'
             }
         }
         stage('Install Dependencies') {
