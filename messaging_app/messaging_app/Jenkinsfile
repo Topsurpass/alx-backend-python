@@ -21,15 +21,17 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps {
-                sh '''
-                python3 -m venv ${VENV}
-                bash -c "source ${VENV}/bin/activate"
-                ${VENV}/bin/pip3 install --upgrade pip
-                bash -c "cd messaging_app/"
-                bash -c "pwd && ls -la"
-                ${VENV}/bin/pip3 install -r messaging_app/requirements.txt
-                '''
+            dir('messaging_app') {
+                steps {
+                    sh '''
+                    python3 -m venv ${VENV}
+                    bash -c "source ${VENV}/bin/activate"
+                    ${VENV}/bin/pip3 install --upgrade pip
+                    bash -c "cd messaging_app/"
+                    bash -c "pwd && ls -la"
+                    ${VENV}/bin/pip3 install -r messaging_app/requirements.txt
+                    '''
+                }
             }
             
         }
