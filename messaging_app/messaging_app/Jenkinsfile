@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV = 'venv' // Virtual environment name
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Checkout code from GitHub
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                //Use bash explicitly for the script to create python environment and install dependencies
+                sh '''
+                bash -c "
+                python3 -m venv venv &&
+                source venv/bin/activate &&
+                pip install -r messaging_app/requirements.txt
+                "
+                '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Run tests using pytest
+                sh '''
+                bash -c "
+                source $VENV/bin/activate
+                pytest --junitxml=report.xml
+                "
+                '''
+            }
+        }
+
+        stage('Publish Test Report') {
+            steps {
+                // Publish test report
+                junit 'report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up workspace
+            deleteDir()
+        }
+    }
+}
