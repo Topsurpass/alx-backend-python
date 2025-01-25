@@ -19,17 +19,6 @@ pipeline {
                 ])
             }
         }
-        stage('Update the system before Install Dependencies') {
-                    steps {
-                        script {
-                            // Update the system and install required dependencies
-                            sh '''
-                                apt-get update || true
-                                apt-get install -y pkg-config libmysqlclient-dev' || true
-                            '''
-                        }
-                    }
-                }
         stage('Install Dependencies') {
             steps {
                 dir('messaging_app') {
