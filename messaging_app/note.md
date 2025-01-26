@@ -1,10 +1,8 @@
 # General flow of the CI/CD pipeline and DevOps process
-## Summary of each step and its role in modern DevOps, CI/CD, and containerized deployments
+### Summary of each step and its role in modern DevOps, CI/CD, and containerized deployments
 
-1. Development (App Building):
-This is the preliminary stage of the whole software development process. At this stage, developers - both Frontend and Backend, develop their applications respectively. This is where containerization of the application starts. During the development stage, developers may use different versions of packages and libraries, which, when merging code together, might result in conflicts and dependency issues. Dockerizing your application helps solve this issue.
-
-Developers save their dependencies in a file, e.g., in Python, `requirements.txt`, and in JavaScript, `package.json`. Once they have this in place, they can create a configuration to build a Docker image in a file called `Dockerfile` and specify the packages to install with their versions inside that image. Once the code is pushed, other developers working on it can create an image and run a container based on the Dockerfile. This ensures that they have the same environment and the same dependencies. With Docker, you do not need to install all of these dependencies on your local machine as you can just install them on your image or container, and that's all.
+1. ## Development (App Building):
+This is the preliminary stage of the whole software development process. At this stage, developers - both Frontend and Backend, develop their applications respectively. This is where containerization of the application starts. During the development stage, developers may use different versions of packages and libraries, which, when merging code together, might result in conflicts and dependency issues. Dockerizing your application helps solve this issue. Developers save their dependencies in a file, e.g., in Python, `requirements.txt`, and in JavaScript, `package.json`. Once they have this in place, they can create a configuration to build a Docker image in a file called `Dockerfile` and specify the packages to install with their versions inside that image. Once the code is pushed, other developers working on it can create an image and run a container based on the Dockerfile. This ensures that they have the same environment and the same dependencies. With Docker, you do not need to install all of these dependencies on your local machine as you can just install them on your image or container, and that's all.
 
 ### Example: Dockerizing a Python Application
 
@@ -53,13 +51,14 @@ Above file content can be achieve in python application by using this:
     ```
 ### N.B:
     In some cases, you might need to access the shell inthe command, to do so, use the command below to access as the root user:
-     ```bash
+
+    ```bash
     docker exec -it --user root jenkins-container bash
     ```
 
 ### Example: Dockerizing a Node.js Application
 
-1. **Create a [package.json](http://_vscodecontentref_/0) file**:
+1. **Create a `package.json` file**:
     ```json
     {
       "name": "my-node-app",
@@ -114,9 +113,9 @@ Above file content can be achieve in python application by using this:
 
 By following these steps, developers can ensure that their applications run consistently across different environments, avoiding the "it works on my machine" problem. Docker provides a standardized unit of software that packages up code and all its dependencies, making it easier to develop, ship, and run applications.
 
-2. # CI/CD (Continuous Integration/Continuous Deployment)
+2. ## CI/CD (Continuous Integration/Continuous Deployment)
 
-## What is CI/CD?
+### What is CI/CD?
 
 CI/CD stands for Continuous Integration and Continuous Deployment/Delivery. It is a method to frequently deliver apps to customers by introducing automation into the stages of app development. The main concepts attributed to CI/CD are continuous integration, continuous deployment, and continuous delivery.
 
@@ -146,7 +145,7 @@ CD is a software release process that uses automated testing to validate whether
 ## Setting Up CI/CD
 
 ### Example with Jenkins
-### What is Jenkins?
+#### What is Jenkins?
 Jenkins is an open-source automation server designed to help developers and teams automate tasks related to building, testing, and deploying software. It's a key tool in the DevOps ecosystem because it simplifies continuous integration (CI) and continuous delivery (CD), ensuring that code changes are automatically tested and deployed quickly and reliably.
 
 Think of Jenkins as your software-building assistant — it automates repetitive tasks so developers can focus on writing code instead of worrying about deployment, testing, or builds.
@@ -212,11 +211,33 @@ Think of Jenkins as your software-building assistant — it automates repetitive
     ```
 4. **Run the Pipeline**:
     - Save the job and click "Build Now" to see your pipeline execute step by step.
+### N.B:
+1. In many cases, your pipeline might not success fully build as the container where your jenkins is running might not have some pacakge or library installed on it. In this case, open the container shell and install them.
+2. Alternatively, ensure that these packages are included in your requirements.py file and create a stage to do the installation.
+3. If you are using jenkins as user on the bash, kindly give necessary permission to jenkins user or switch to root and install.
+4. Note that if you delete the container where jenkins is running, all of the installation and setup will bve deleted and you will have to start afresh again by creating new container from the image.
+
+### Real-World Examples of Jenkins Usage
+1. Building a Web App:
+Automatically build and deploy a React or Angular application when developers push code to GitHub.
+2. Containerized Deployment:
+Build a Docker image for your Node.js app, push it to Docker Hub, and deploy it to Kubernetes.
+3. Mobile App Development:
+Compile Android or iOS apps, run tests on a cloud-based emulator, and deploy the app to Google Play or the App Store.
+4. Integration with Git:
+Set up Jenkins to pull the latest code changes from GitHub, run tests, and notify developers on Slack if something fails.
+5. In cases where your pipeline needs to run docker commands within it's container, you will have to install docker inside the container to achieve this. Cases where you might need it includes when you need to build and push an image of your app after being tested to registry like docker hub. In this instance, you will have to:
+  - Make sure the Jenkins server has Docker installed and running.
+  - Grant Jenkins user permission to run Docker commands (add the user to the docker group):
+  ```bash
+  // switch to root user and run this command
+  sudo usermod -aG docker jenkins
+  ```
 
 ### Example with GitHub Actions
 
 1. **Create a GitHub Actions Workflow**:
-    - Create a `.github/workflows/main.yml` file in your repository.
+    - Create a `.github/workflows/main.yml` file in your repository root directory.
 
     ```yaml
     name: CI/CD Pipeline
@@ -251,6 +272,8 @@ Think of Jenkins as your software-building assistant — it automates repetitive
         - name: Deploy
           run: npm run deploy
     ```
+
+  2. Push your code to github and check under the action tab for the execution of the jobs in your workflow.
 
 ## Jenkins vs. GitHub Actions
 
