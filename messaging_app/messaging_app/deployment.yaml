@@ -51,16 +51,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django-messaging-app
+  name: django-messaging-yellow
+  labels:
+    app: django-app
+    version: blue
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: django-messaging-app
+      app: django-app
+      version: default
   template:
     metadata:
       labels:
-        app: django-messaging-app
+        app: django-app
+        version: default
     spec:
       containers:
         - name: django-app
@@ -84,16 +89,3 @@ spec:
               value: ${USE_MYSQL}
             - name: MYSQL_PORT
               value: ${MYSQL_PORT}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: django-app-service
-spec:
-  selector:
-    app: django-messaging-app
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
-  clusterIP: None
