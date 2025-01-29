@@ -10,13 +10,13 @@ This is the preliminary stage of the whole software development process. At this
 
 1. **Create a `requirements.txt` file**:
    `plaintext
-    flask==2.0.1
-    requests==2.25.1
-    `
+ flask==2.0.1
+ requests==2.25.1
+ `
    Above file content can be achieve in python application by using this:
    `bash
-    pip freeze > requirements.txt
-    `
+ pip freeze > requirements.txt
+ `
 
 2. **Create a `Dockerfile`**:
 
@@ -458,4 +458,113 @@ pipeline {
         }
     }
 }
+```
+
+## Kubernetes: Orchestrating Containerized Applications
+
+Kubernetes (often abbreviated as K8s) is an open-source container orchestration platform designed to automate the deployment, scaling, and management of containerized applications. Originally developed by Google and now maintained by the Cloud Native Computing Foundation (CNCF), Kubernetes has become the de facto standard for managing modern cloud-native workloads.
+
+### Brief introduction on Kubenetes and minikube relationship
+
+Minikube is a tool that sets up a local Kubernetes cluster on a single machine, usually for development or testing purposes. A kubenetes cluster is a set of machines that run containerized applications. But how to explain that simply? Maybe compare it to a team where each member has a role. The cluster is like the whole team working together. Nodes. In Kubernetes, nodes are the individual machines, either physical or virtual. There are master nodes (control plane) and worker nodes. The control plane manages the cluster, and worker nodes run the applications. But Minikube uses one machine that acts as both master and worker.
+
+### Understanding Kubernetes Architecture
+
+**Clusters**: The Foundation of Kubernetes
+A Kubernetes cluster is a collection of machines (physical or virtual) that work collectively to run containerized applications. Think of a cluster as a highly coordinated team: each member (machine) has a specialized role, and together, they ensure applications run reliably, scale seamlessly, and recover from failures automatically.
+
+**Nodes**: The Workers of the Cluster
+Nodes are the individual machines within a Kubernetes cluster. They are categorized into two types:
+
+1. **Control Plane (Master Nodes)**:
+   The control plane is the brain of the cluster, responsible for global decision-making and managing the cluster’s desired state. Key components include:
+
+   - API Server: The front-end for cluster interactions.
+   - etcd: A distributed key-value store for cluster data.
+   - Scheduler: Assigns workloads to worker nodes.
+   - Controller Manager: Monitors and repairs cluster state (e.g., restarting failed containers).
+   - Cloud Controller Manager: Integrates with cloud provider APIs (optional).
+
+2. **Worker Nodes**:
+   These execute application workloads. Each worker node hosts:
+
+   - Kubelet: An agent communicating with the control plane.
+   - kube-proxy: Manages network rules for communication.
+   - Container Runtime: Software like Docker or containerd to run containers.
+
+### Minikube: Local Kubernetes Development Made Simple
+
+**What is Minikube?**
+Minikube is a lightweight, open-source tool that provisions a single-node Kubernetes cluster on a local machine (e.g., a developer’s laptop). It simulates a production-grade cluster in a simplified environment, making it ideal for:
+
+- Local development and testing.
+- Learning Kubernetes concepts.
+- Experimenting with configurations before deploying to production.
+  Unlike multi-node production clusters, Minikube combines the control plane and worker node roles into a single machine, reducing resource overhead while retaining core Kubernetes functionality.
+  Kubernetes is like the manager of a complex restaurant chain, ensuring your apps (cooks) are always running, balanced, and serving users efficiently. It’s designed for modern cloud-based applications and helps businesses save time, effort, and money while maintaining high reliability and scalability.
+
+#### Key Features of Minikube
+
+1.  Single-Node Cluster: Simulates master and worker roles on one machine.
+2.  Cross-Platform Support: Runs on Windows, macOS, and Linux.
+3.  Addon Ecosystem: Extends functionality with DNS, dashboard, and ingress controllers.
+4.  Isolated Environment: Sandboxes development workflows without impacting production.
+
+#### N.B:
+
+1.  When we create a Kubernetes cluster, there is one control plane (master node) that manages the entire cluster, no matter how many worker nodes exist. The control plane is responsible for decision-making (like scheduling workloads, monitoring nodes, and managing cluster states).
+2.  All other nodes in the cluster are worker nodes, and they are responsible for running your applications. The control plane tells these worker nodes what to do, but the worker nodes themselves don’t make management decisions—they just execute.
+3.  Inside each worker node, you have pods, and the pods are where your containerized applications live. A pod is the smallest deployable unit in Kubernetes and can contain one or more tightly coupled containers.
+4.  Pods can communicate with each other—even if they’re on different worker nodes—using Kubernetes networking. And we use services to expose pods, making them accessible to other pods or external users.
+
+### What can cause a node to go down?
+
+A node going down means that the machine (virtual or physical) running that node is no longer operational or reachable. Here are some common reasons why this might happen:
+
+1.  Hardware failure: If a physical server hosting the node crashes (e.g., due to a power outage or disk failure), the node goes down.
+2.  Network issues: If there’s a network connectivity problem, the node might become unreachable by the control plane.
+3.  Resource exhaustion: If the node runs out of resources (like CPU, memory, or disk space), it might crash or become non-functional.
+4.  Configuration issues: Misconfigured Kubernetes components or software (e.g., kubelet, container runtime) can cause the node to fail.
+5.  Operating system crash: If the operating system hosting the node crashes (e.g., due to kernel panic), the node will go down.
+6.  Manual intervention: Someone might accidentally or intentionally shut down the node.
+7.  Software updates/reboots: During maintenance, if the node is rebooted or software updates are applied, it will temporarily go down.
+
+### Installation of kubenetes with minikube
+
+**Order of Installation**
+
+- Install Docker (or an alternative container runtime).
+- Install Minikube (it can install before or after Docker, but Docker is necessary for Minikube's default configuration).
+- Install kubectl to interact with the Kubernetes cluster created by Minikube.
+
+```bash
+# Kubenetes installation For Linux (Debian/Ubuntu)
+sudo apt-get update && sudo apt-get install -y kubectl
+```
+
+```bash
+# Minikube installation
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
+
+```bash
+# Start Minikube
+minikube start --driver=<driver-name>  # e.g., virtualbox, hyperkit
+```
+
+```bash
+# Verify cluster status
+kubectl get nodes
+```
+
+```bash
+# Deploy sample application
+kubectl create deployment hello-minikube --image=k8s.gcr.io/echoserver:1.4
+kubectl expose deployment hello-minikube --type=NodePort --port=8080
+```
+
+```bash
+# Access the app
+minikube service hello-minikube
 ```
